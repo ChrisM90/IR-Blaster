@@ -4,6 +4,9 @@
 #include <IRutils.h>
 #include <IRsend.h>
 #include <IRrecv.h>
+#include <ESP8266mDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
 
 #define Button 0
 #define LED0 12
@@ -19,6 +22,8 @@ const uint16_t kCaptureBufferSize = 1024;
 const uint8_t kTimeout = 15;
 const uint16_t kMinUnknownSize = 12;
 String RECIRCode;
+String LAYOUT = "";
+bool doupdate = false;
 WiFiServer server(80);
 WiFiClient client;
 IRsend irsend(IRTrans);
@@ -160,6 +165,66 @@ long parse_long_from_string(String inputstr, int startindex, int endindex) {
 
 void setup()
 {
+  ArduinoOTA.setHostname("ESP_IR_BLASTER");
+  // No authentication by default
+  // ArduinoOTA.setPassword("admin");
+
+  // Password can be set with it's md5 value as well
+  // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+  // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
+  ArduinoOTA.onStart([]()
+  {
+    String type;
+    if (ArduinoOTA.getCommand() == U_FLASH)
+    {
+      type = "sketch";
+    }
+    else
+    { // U_SPIFFS
+      type = "filesystem";
+    }
+
+    SPIFFS.end();
+    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+    Serial.println("Start updating " + type);
+  });
+
+  ArduinoOTA.onEnd([]()
+  {
+    Serial.println("\nEnd");
+  });
+
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
+  {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  });
+
+  ArduinoOTA.onError([](ota_error_t error)
+  {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR)
+    {
+      Serial.println("Auth Failed");
+    } 
+    else if (error == OTA_BEGIN_ERROR)
+    {
+      Serial.println("Begin Failed");
+    } 
+    else if (error == OTA_CONNECT_ERROR)
+    {
+      Serial.println("Connect Failed");
+    } 
+    else if (error == OTA_RECEIVE_ERROR)
+    {
+      Serial.println("Receive Failed");
+    } 
+    else if (error == OTA_END_ERROR)
+    {
+      Serial.println("End Failed");
+    }
+  });
+  
   pinMode(LED0, OUTPUT);
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
@@ -205,32 +270,55 @@ void setup()
     Serial.println(f.size());
     f.close();
   }
-   
+
+
+   LAYOUT = ReadLayout();
 }
 
 void loop()
 {
+  if(doupdate)
+  {
+    ArduinoOTA.handle();
 
-  if(LEDID == 0)
-  {
-    LEDID = 1;
-    digitalWrite(LED0, HIGH);
-    digitalWrite(LED1, LOW);
-    digitalWrite(LED2, LOW);
+    if(LEDID == 0)
+    {
+      digitalWrite(LED0, HIGH);
+      digitalWrite(LED1, HIGH);
+      digitalWrite(LED2, HIGH);
+      LEDID = 1;
+    }
+    else
+    {
+      digitalWrite(LED0, LOW);
+      digitalWrite(LED1, LOW);
+      digitalWrite(LED2, LOW);
+      LEDID = 0;
+    }
   }
-  else if(LEDID == 1)
-  {
-    LEDID = 2;
-    digitalWrite(LED0, LOW);
-    digitalWrite(LED1, HIGH);
-    digitalWrite(LED2, LOW);
-  }
-  else if(LEDID == 2)
-  {
-    LEDID = 0;
-    digitalWrite(LED0, LOW);
-    digitalWrite(LED1, LOW);
-    digitalWrite(LED2, HIGH);
+  else
+  {  
+    if(LEDID == 0)
+    {
+      LEDID = 1;
+      digitalWrite(LED0, HIGH);
+      digitalWrite(LED1, LOW);
+      digitalWrite(LED2, LOW);
+    }
+    else if(LEDID == 1)
+    {
+      LEDID = 2;
+      digitalWrite(LED0, LOW);
+      digitalWrite(LED1, HIGH);
+      digitalWrite(LED2, LOW);
+    }
+    else if(LEDID == 2)
+    {
+      LEDID = 0;
+      digitalWrite(LED0, LOW);
+      digitalWrite(LED1, LOW);
+      digitalWrite(LED2, HIGH);
+    }
   }
 
   if (wait_for_client())
@@ -263,11 +351,31 @@ void loop()
       client.print(response);
       client.flush();
     }
+    else if(req == "/LAYOUT")
+    { 
+      String response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + LAYOUT + "\r\n\r\n";
+      client.print(response);
+      client.flush();
+    }
+    else if(req.length() > 30)
+    {
+      req.remove(0,1);
+      WriteLayout(req);
+      LAYOUT = ReadLayout();
+    }
+    else if(req == "/UPDATE")
+    {
+      client.stop();
+      server.stop();
+      ArduinoOTA.begin();
+      doupdate = true;
+    }
     else
     {
       if (!send_ir_cmd(req))
       {
-         Serial.println("Not recognized" );
+         Serial.println("Not recognized");
+         Serial.println(req);
       }
     }
   }
@@ -279,6 +387,42 @@ void loop()
         sendpage(req);
      }
   }
+}
 
-  //client.stop();
+String ReadLayout()
+{
+  File f = SPIFFS.open("/layout.txt", "r");
+  String result = "";
+  
+  if (!f)
+  {
+      return result;
+  }
+
+  for (int i = 0; i < f.size(); i++)
+  {
+     result += (char)f.read();
+  }
+ 
+  f.close();
+
+  Serial.println(result);
+  
+  return result;
+}
+
+void WriteLayout(String layout)
+{
+  File file = SPIFFS.open("/layout.txt", "w");
+
+  if (!file)
+  {
+      return;
+  }
+
+  Serial.println(layout);
+
+  file.print(layout);
+
+  file.close();
 }

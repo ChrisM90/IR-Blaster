@@ -53,8 +53,7 @@ body {
 </style>
 </head>
 <body>
-<p id="demo"></p> 
-<div class="wrap" id="remotes">
+<div class="wrap" id="layoutdata">
 </div>
 
 <script>
@@ -74,42 +73,14 @@ function getlayout()
 	{
 		if(xhttp.status == 200)
 		{
-			var LAYOUTS = (JSON.parse(atob(xhttp.responseText))).layouts;
-			var container  = document.getElementById("remotes");
+			var container  = document.getElementById("layoutdata");
 			container.innerHTML = "";
+			container.innerHTML += "<textarea id='jsonlayout' rows='40' cols='100'>" + atob(xhttp.responseText) + "</textarea>";
 			
-			for (var i = 0; i < LAYOUTS.length; i++)
-			{
-				var layoutname = LAYOUTS[i].name;
-				container.innerHTML += "<button onclick=\"selectremote(" + i + ")\" class=\"btn red\">" + layoutname + "</button>&nbsp;";
-			}
-			container.innerHTML += "<br>";
-			container.innerHTML += "<br>";
-			
-			for (var i = 0; i < LAYOUTS.length; i++)
-			{ 
-			  var layoutname = LAYOUTS[i].name;
-			  var buttons = LAYOUTS[i].button;
-			  var currentrow = 0;
-			  
-			  container.innerHTML += "<div id='div" + i + "' style='display:none'></div>";
-			  
-			  var remotediv  = document.getElementById("div" + i);
-			  
-			  for (var j = 0; j < buttons.length; j++)
-		      { 
-			     var buttonname = buttons[j].label;
-				 var buttonvalue = buttons[j].value;
-				 var row = buttons[j].row;
-				 
-				 if(row > currentrow)
-				 {
-				   remotediv.innerHTML += "<br>";
-				   currentrow = row;
-				 }
-				 remotediv.innerHTML += "<button onclick=\"sendcmd('" + buttonvalue + "')\" class=\"btn blu\">" + buttonname + "</button>&nbsp;";
-			  }
-			}
+			container.innerHTML += "<br><br>";
+			container.innerHTML += "<button onclick=\"sendcmd('RECIR')\" class=\"btn blu\">REC IR</button>&nbsp;";
+			container.innerHTML += "<button onclick=\"SaveLayout()\" class=\"btn blu\">Save layout</button>&nbsp;";
+			container.innerHTML += "<button onclick=\"FirmwareUpdate()\" class=\"btn blu\">Firmware Update</button>";
 		}
 	}
   }
@@ -129,7 +100,7 @@ function sendcmd(cmd)
 		if(xhttp.status == 200)
 		{
 			var IRCode = JSON.parse(xhttp.responseText);
-			document.getElementById("demo").innerHTML = IRCode.IRCode;
+			alert(IRCode.IRCode);
 		}
 	}
   }
@@ -138,20 +109,20 @@ function sendcmd(cmd)
   xhttp.send();
 }
 
-function selectremote(id)
+function SaveLayout()
 {
-  var remotediv  = document.getElementById("div" + id);
-  
-  var childDivs = document.getElementById('remotes').getElementsByTagName('div');
-
-  for( i=0; i< childDivs.length; i++ )
-  {
-    var childDiv = childDivs[i];
-	childDiv.style.display = "none";
-  }
-
-  remotediv.style.display = "block";
+  var xhttp = new XMLHttpRequest();
+  xhttp.open("POST", btoa(document.getElementById("jsonlayout").value), true);
+  xhttp.send();
 }
+
+function FirmwareUpdate()
+{
+  var xhttp = new XMLHttpRequest();
+  xhttp.open("POST", "UPDATE", true);
+  xhttp.send();
+}
+
 </script>
 </body>
 </html>
