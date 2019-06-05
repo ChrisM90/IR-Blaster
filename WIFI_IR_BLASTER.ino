@@ -95,23 +95,276 @@ int wait_for_client()
       return 1; 
     }
   } 
-  //while(1) {delay(100);}
   return 0;
 }
-// --------------IR --------------
-bool send_ir_cmd(String cmd) //returns true if command was sent sucessfully, obviously.  accepts format "IRFORMAT-Data-datalengthinbits" example: "NEC-5132547896-32"
+
+bool send_ir_cmd(String cmd) 
 {     
-  if (cmd.indexOf("3-") != -1)
-  {   //okay, NEC, we know howo to do this
-      long data = parse_long_from_string(cmd, cmd.indexOf("-")+1, cmd.lastIndexOf("-")-1);
-      int datalen = parse_int_from_string(cmd, cmd.lastIndexOf("-")+1, cmd.length() -1);
-      irsend.sendNEC(data, datalen);
-      delay(40);
+  long data = parse_long_from_string(cmd, cmd.indexOf("-")+1, cmd.lastIndexOf("-")-1);
+  int datalen = parse_int_from_string(cmd, cmd.lastIndexOf("-")+1, cmd.length() -1);
+
+  if (cmd.indexOf("1-") != -1)
+  { 
+    irsend.sendRC5(data, datalen);  
+  }
+  else if (cmd.indexOf("2-") != -1)
+  { 
+    irsend.sendRC6(data, datalen);  
+  }
+  else if (cmd.indexOf("3-") != -1)
+  { 
+    irsend.sendNEC(data, datalen);  
+  }
+  else if (cmd.indexOf("4-") != -1)
+  { 
+    irsend.sendSony(data, datalen);  
+  }
+  else if (cmd.indexOf("5-") != -1)
+  { 
+    irsend.sendPanasonic(data, datalen);  
+  }
+  else if (cmd.indexOf("6-") != -1)
+  { 
+    irsend.sendJVC(data, datalen);  
+  }
+  else if (cmd.indexOf("7-") != -1)
+  { 
+    irsend.sendSAMSUNG(data, datalen);  
+  }
+  else if (cmd.indexOf("8-") != -1)
+  { 
+    irsend.sendWhynter(data, datalen);  
+  }
+  else if (cmd.indexOf("9-") != -1)
+  { 
+    irsend.sendNEC(data, datalen);  
+  }
+  else if (cmd.indexOf("10-") != -1)
+  { 
+    irsend.sendLG(data, datalen);  
+  }
+  else if (cmd.indexOf("11-") != -1)
+  { 
+    irsend.sendNEC(data, datalen);  
+  }
+  else if (cmd.indexOf("12-") != -1)
+  { 
+    irsend.sendMitsubishi(data, datalen);  
+  }
+  else if (cmd.indexOf("13-") != -1)
+  { 
+    irsend.sendDISH(data, datalen);  
+  }
+  else if (cmd.indexOf("14-") != -1)
+  { 
+    irsend.sendSharp(data, datalen);  
+  }
+  else if (cmd.indexOf("15-") != -1)
+  { 
+    irsend.sendCOOLIX(data, datalen);  
+  }
+  else if (cmd.indexOf("16-") != -1)
+  { 
+    //irsend.sendDaikin(data, datalen);  
+  }
+  else if (cmd.indexOf("17-") != -1)
+  { 
+    irsend.sendDenon(data, datalen);  
+  }
+  else if (cmd.indexOf("18-") != -1)
+  { 
+    //irsend.sendKelvinator(data, datalen);  
+  }
+  else if (cmd.indexOf("19-") != -1)
+  { 
+    irsend.sendSherwood(data, datalen);  
+  }
+  else if (cmd.indexOf("20-") != -1)
+  { 
+    //irsend.sendMitsubishiAC(data, datalen);  
+  }
+  else if (cmd.indexOf("21-") != -1)
+  { 
+    irsend.sendRCMM(data, datalen);  
+  }
+  else if (cmd.indexOf("22-") != -1)
+  { 
+    irsend.sendSanyoLC7461(data, datalen);  
+  }
+  else if (cmd.indexOf("23-") != -1)
+  { 
+    irsend.sendRC5(data, datalen);  
+  }
+  else if (cmd.indexOf("24-") != -1)
+  { 
+    irsend.sendGree(data, datalen);  
+  }
+  else if (cmd.indexOf("25-") != -1)
+  { 
+    //irsend.sendPronto(data, datalen);  
+  }
+  else if (cmd.indexOf("26-") != -1)
+  { 
+    irsend.sendNEC(data, datalen);  
+  }
+  else if (cmd.indexOf("27-") != -1)
+  { 
+    //irsend.sendArgo(data, datalen);  
+  }
+  else if (cmd.indexOf("28-") != -1)
+  { 
+    //irsend.sendTrotec(data, datalen);  
+  }
+  else if (cmd.indexOf("29-") != -1)
+  { 
+    irsend.sendNikai(data, datalen);  
+  }
+  else if (cmd.indexOf("30-") != -1)
+  { 
+    //irsend.sendRaw(data, datalen);  
+  }
+  else if (cmd.indexOf("31-") != -1)
+  { 
+    //irsend.sendGC(data, datalen);  
+  }
+  else if (cmd.indexOf("32-") != -1)
+  { 
+    //irsend.sendToshibaAC(data, datalen);  
+  }
+  else if (cmd.indexOf("33-") != -1)
+  { 
+    //irsend.sendFujitsuAC(data, datalen);  
+  }
+  else if (cmd.indexOf("34-") != -1)
+  { 
+    irsend.sendMidea(data, datalen);  
+  }
+  else if (cmd.indexOf("35-") != -1)
+  { 
+    irsend.sendMagiQuest(data, datalen);  
+  }
+  else if (cmd.indexOf("36-") != -1)
+  { 
+    irsend.sendLasertag(data, datalen);  
+  }
+  else if (cmd.indexOf("37-") != -1)
+  { 
+    irsend.sendCarrierAC(data, datalen);  
+  }
+  else if (cmd.indexOf("38-") != -1)
+  { 
+    //irsend.sendHaierAC(data, datalen);  
+  }
+  else if (cmd.indexOf("39-") != -1)
+  { 
+    irsend.sendMitsubishi2(data, datalen);  
+  }
+  else if (cmd.indexOf("40-") != -1)
+  { 
+    //irsend.sendHitachiAC(data, datalen);  
+  }
+  else if (cmd.indexOf("41-") != -1)
+  { 
+    //irsend.sendHitachiAC1(data, datalen);  
+  }
+  else if (cmd.indexOf("42-") != -1)
+  { 
+    //irsend.sendHitachiAC2(data, datalen);  
+  }
+  else if (cmd.indexOf("43-") != -1)
+  { 
+    irsend.sendGICable(data, datalen);  
+  }
+  else if (cmd.indexOf("44-") != -1)
+  { 
+    //irsend.sendHaierACYRW02(data, datalen);  
+  }
+  else if (cmd.indexOf("45-") != -1)
+  { 
+    //irsend.sendWhirlpoolAC(data, datalen);  
+  }
+  else if (cmd.indexOf("46-") != -1)
+  { 
+    //irsend.sendSamsungAC(data, datalen);  
+  }
+  else if (cmd.indexOf("47-") != -1)
+  { 
+    irsend.sendLutron(data, datalen);  
+  }
+  else if (cmd.indexOf("48-") != -1)
+  { 
+    //irsend.sendElectraAC(data, datalen);  
+  }
+  else if (cmd.indexOf("49-") != -1)
+  { 
+    //irsend.sendPanasonicAC(data, datalen);  
+  }
+  else if (cmd.indexOf("50-") != -1)
+  { 
+    irsend.sendPioneer(data, datalen);  
+  }
+  else if (cmd.indexOf("51-") != -1)
+  { 
+    irsend.sendLG2(data, datalen);  
+  }
+  else if (cmd.indexOf("52-") != -1)
+  { 
+    //irsend.sendMWM(data, datalen);  
+  }
+  else if (cmd.indexOf("53-") != -1)
+  { 
+    //irsend.sendDaikin2(data, datalen);  
+  }
+  else if (cmd.indexOf("54-") != -1)
+  { 
+    irsend.sendVestelAc(data, datalen);  
+  }
+  else if (cmd.indexOf("55-") != -1)
+  { 
+    irsend.sendTeco(data, datalen);  
+  }
+  else if (cmd.indexOf("56-") != -1)
+  { 
+    irsend.sendSamsung36(data, datalen);  
+  }
+  else if (cmd.indexOf("57-") != -1)
+  { 
+    //irsend.sendTcl112Ac(data, datalen);  
+  }
+  else if (cmd.indexOf("58-") != -1)
+  { 
+    irsend.sendLegoPf(data, datalen);  
+  }
+  else if (cmd.indexOf("59-") != -1)
+  { 
+    //irsend.sendMitsubishiHeavy88(data, datalen);  
+  }
+  else if (cmd.indexOf("60-") != -1)
+  { 
+    //irsend.sendMitsubishiHeavy152(data, datalen);  
+  }
+  else if (cmd.indexOf("61-") != -1)
+  { 
+    //irsend.sendDaikin216(data, datalen);  
+  }
+  else if (cmd.indexOf("62-") != -1)
+  { 
+    //irsend.sendSharpAc(data, datalen);  
+  }
+  else if (cmd.indexOf("63-") != -1)
+  { 
+    //irsend.sendGoodweather(data, datalen);  
+  }
+  else if (cmd.indexOf("64-") != -1)
+  { 
+    //irsend.sendInax(data, datalen);  
   }
   else 
-  {                         // elseifs for other than NEC belong here somewhere
+  {
     return false;
   }
+  
+  delay(40);
 } 
 
 String get_ir_cmd()
@@ -144,19 +397,24 @@ String get_ir_cmd()
   return RECIRCode;
 }
 
-int parse_int_from_string(String inputstr, int startindex, int endindex) {
+int parse_int_from_string(String inputstr, int startindex, int endindex)
+{
   int i = startindex;
   int res = 0;
-  while (i <= endindex)  {
+  while (i <= endindex) 
+  {
     res = res * 10 + (uint8_t)inputstr.charAt(i) - '0';
     i++;
   }
   return res;
 }
-long parse_long_from_string(String inputstr, int startindex, int endindex) {
+
+long parse_long_from_string(String inputstr, int startindex, int endindex)
+{
   int i = startindex;
   long res = 0;
-  while (i <= endindex)  {
+  while (i <= endindex)
+  {
     res = res * 10 + (uint8_t)inputstr.charAt(i) - '0';
     i++;
   }
@@ -186,7 +444,7 @@ void setup()
     }
 
     SPIFFS.end();
-    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+
     Serial.println("Start updating " + type);
   });
 
@@ -331,7 +589,9 @@ void loop()
   String req = client.readStringUntil(' ');
   req = client.readStringUntil(' ');
   client.flush();
-
+  Serial.println(req);
+  Serial.flush();
+  
   if (req.indexOf("favicon.ico") !=-1)
   {      //google chrome sends several of these annoying requests, i ignore them
     client.stop();
